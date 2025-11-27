@@ -14,8 +14,8 @@ app.post("/download", async (req, res) => {
   if (!url) return res.status(400).json({ error: "url required" });
 
   try {
-    const videoId = ytdl.getURLVideoID(url);
-    const fileName = `video_${videoId}_${Date.now()}.mp4`;
+    // ファイル名はタイムスタンプだけでユニークに
+    const fileName = `video_${Date.now()}.mp4`;
     const filePath = path.join(TEMP_DIR, fileName);
 
     // ダウンロードストリーム
