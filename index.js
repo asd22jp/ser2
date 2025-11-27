@@ -18,17 +18,32 @@ app.post("/download", async (req, res) => {
     const fileName = `video_${videoId}_${Date.now()}.mp4`;
     const filePath = path.join(TEMP_DIR, fileName);
 
+    // ダウンロードストリーム
+    const videoStream = ytdl(url, { quality: "highest" });
     const writeStream = fs.createWriteStream(filePath);
-    ytdl(url, { quality: "highest" }).pipe(writeStream);
+
+    videoStream.pipe(writeStream);
 
     writeStream.on("finish", () => {
-      const videoBuffer = fs.readFileSync(filePath);
-      const base64Data = videoBuffer.toString("base64");
-      res.json({ base64: base64Data });
-      fs.unlinkSync(filePath); // 一時ファイル削除
+      try {
+        const videoBuffer = fs.readFileSync(filePath);
+        const base64Data = videoBuffer.toString("base64");
+
+        // レスポンス送信
+        res.json({ base64: base64Data });
+
+        // 一時ファイル削除
+        fs.unlink(filePath, () => {});
+      } catch (err) {
+        res.status(500).json({ error: err.message });
+      }
     });
 
     writeStream.on("error", (err) => {
+      res.status(500).json({ error: err.message });
+    });
+
+    videoStream.on("error", (err) => {
       res.status(500).json({ error: err.message });
     });
   } catch (err) {
