@@ -1,19 +1,13 @@
 {
-  "name": "gemini-image-server",
+  "name": "youtube-downloader",
   "version": "1.0.0",
-  "description": "Render server for Gemini API image generation with queue handling",
-  "main": "index.js",
+  "type": "module",
+  "main": "server.js",
   "scripts": {
-    "start": "node index.js",
-    "dev": "nodemon index.js"
+    "start": "node server.js"
   },
-  "license": "MIT",
   "dependencies": {
     "express": "^4.18.2",
-    "node-fetch": "^3.3.2"
-  },
-  "devDependencies": {
-    "nodemon": "^3.0.2"
-  },
-  "type": "module"
+    "ytdl-core": "^4.11.1"
+  }
 }
