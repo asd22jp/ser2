@@ -11,7 +11,7 @@ let processing = false;
 const queue = [];
 
 // Gemini API 呼び出し + 429時リトライ
-async function fetchGemini(prompt, retries = 3) {
+async function fetchGemini(prompt, retries = 3, retryDelay = 2000) {
   const jsonData = {
     contents: [
       { parts: [{ text: `Generate a high-quality image of: ${prompt}` }] },
@@ -32,10 +32,13 @@ async function fetchGemini(prompt, retries = 3) {
     if (response.status === 429) {
       if (retries <= 0)
         throw new Error("429 Too Many Requests: リトライ回数オーバー");
+
+      // Retry-After ヘッダがあれば使う、なければ retryDelay
       const retryAfter =
         parseInt(response.headers.get("Retry-After")) || retryDelay / 1000;
       console.log(`429 受信、${retryAfter}秒待ってリトライします...`);
       await new Promise((r) => setTimeout(r, retryAfter * 1000));
+
       return fetchGemini(prompt, retries - 1, retryDelay * 2); // 待機時間を2倍に
     }
 
