@@ -1,0 +1,19 @@
+{
+  "name": "gemini-image-server",
+  "version": "1.0.0",
+  "description": "Render server for Gemini API image generation with queue handling",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  },
+  "type": "module"
+}
