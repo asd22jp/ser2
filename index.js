@@ -5,13 +5,13 @@ const app = express();
 app.use(express.json());
 
 const MODEL_NAME = "gemini-2.5-flash-image";
-const API_KEYS = process.env.GEMINI_API_KEY;
+const API_KEY = process.env.GEMINI_API_KEY; // 単一キー
+
 let processing = false;
 const queue = [];
 
 // Gemini API 呼び出し + 429時リトライ
 async function fetchGemini(prompt, retries = 3) {
-  const apiKey = API_KEYS[Math.floor(Math.random() * API_KEYS.length)];
   const jsonData = {
     contents: [
       { parts: [{ text: `Generate a high-quality image of: ${prompt}` }] },
@@ -21,7 +21,7 @@ async function fetchGemini(prompt, retries = 3) {
 
   try {
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${API_KEY}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
