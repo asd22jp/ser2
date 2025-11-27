@@ -9,7 +9,6 @@ app.use(express.json());
 const TEMP_DIR = "./tmp";
 if (!fs.existsSync(TEMP_DIR)) fs.mkdirSync(TEMP_DIR);
 
-// YouTube動画をダウンロードしてファイル名を返す
 app.post("/download", async (req, res) => {
   const { url } = req.body;
   if (!url) return res.status(400).json({ error: "url required" });
@@ -23,7 +22,10 @@ app.post("/download", async (req, res) => {
     ytdl(url, { quality: "highest" }).pipe(writeStream);
 
     writeStream.on("finish", () => {
-      res.json({ fileName, path: filePath });
+      const videoBuffer = fs.readFileSync(filePath);
+      const base64Data = videoBuffer.toString("base64");
+      res.json({ base64: base64Data });
+      fs.unlinkSync(filePath); // 一時ファイル削除
     });
 
     writeStream.on("error", (err) => {
