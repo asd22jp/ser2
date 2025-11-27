@@ -5,7 +5,7 @@ const app = express();
 app.use(express.json());
 
 const MODEL_NAME = "gemini-2.5-flash-image";
-const API_KEYS = [process.env.GEMINI_API_KEY1, process.env.GEMINI_API_KEY2]; // 複数キー可
+const API_KEYS = process.env.GEMINI_API_KEY;
 let processing = false;
 const queue = [];
 
