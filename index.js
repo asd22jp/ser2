@@ -14,14 +14,20 @@ app.post("/download", async (req, res) => {
   if (!url) return res.status(400).json({ error: "url required" });
 
   try {
-    // ファイル名はタイムスタンプだけでユニークに
     const fileName = `video_${Date.now()}.mp4`;
     const filePath = path.join(TEMP_DIR, fileName);
 
-    // ダウンロードストリーム
-    const videoStream = ytdl(url, { quality: "highest" });
-    const writeStream = fs.createWriteStream(filePath);
+    // 毎リクエストでCookieを空にする
+    const videoStream = ytdl(url, {
+      quality: "highest",
+      requestOptions: {
+        headers: {
+          cookie: "", // 空にすることでCookieを無効化
+        },
+      },
+    });
 
+    const writeStream = fs.createWriteStream(filePath);
     videoStream.pipe(writeStream);
 
     writeStream.on("finish", () => {
@@ -29,23 +35,20 @@ app.post("/download", async (req, res) => {
         const videoBuffer = fs.readFileSync(filePath);
         const base64Data = videoBuffer.toString("base64");
 
-        // レスポンス送信
         res.json({ base64: base64Data });
 
-        // 一時ファイル削除
         fs.unlink(filePath, () => {});
       } catch (err) {
         res.status(500).json({ error: err.message });
       }
     });
 
-    writeStream.on("error", (err) => {
-      res.status(500).json({ error: err.message });
-    });
-
-    videoStream.on("error", (err) => {
-      res.status(500).json({ error: err.message });
-    });
+    writeStream.on("error", (err) =>
+      res.status(500).json({ error: err.message })
+    );
+    videoStream.on("error", (err) =>
+      res.status(500).json({ error: err.message })
+    );
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
