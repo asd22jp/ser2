@@ -32,19 +32,22 @@ async function fetchGemini(prompt, retries = 3) {
     if (response.status === 429) {
       if (retries <= 0)
         throw new Error("429 Too Many Requests: リトライ回数オーバー");
-      // Retry-After ヘッダ取得（秒単位）
-      const retryAfter = parseInt(response.headers.get("Retry-After")) || 2;
+      const retryAfter =
+        parseInt(response.headers.get("Retry-After")) || retryDelay / 1000;
       console.log(`429 受信、${retryAfter}秒待ってリトライします...`);
       await new Promise((r) => setTimeout(r, retryAfter * 1000));
-      return fetchGemini(prompt, retries - 1);
+      return fetchGemini(prompt, retries - 1, retryDelay * 2); // 待機時間を2倍に
     }
 
     return await response.json();
   } catch (err) {
     if (retries > 0) {
-      console.log("エラー発生、2秒待ってリトライ:", err.message);
-      await new Promise((r) => setTimeout(r, 2000));
-      return fetchGemini(prompt, retries - 1);
+      console.log(
+        `エラー発生、${retryDelay / 1000}秒待ってリトライ:`,
+        err.message
+      );
+      await new Promise((r) => setTimeout(r, retryDelay));
+      return fetchGemini(prompt, retries - 1, retryDelay * 2);
     }
     throw err;
   }
