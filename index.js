@@ -2,6 +2,7 @@ import express from "express";
 import ytdl from "ytdl-core";
 import fs from "fs";
 import path from "path";
+import HttpsProxyAgent from "https-proxy-agent";
 
 const app = express();
 app.use(express.json());
@@ -10,10 +11,14 @@ app.use(express.static("public")); // HTMLやJSを置くディレクトリ
 const TEMP_DIR = "./tmp";
 if (!fs.existsSync(TEMP_DIR)) fs.mkdirSync(TEMP_DIR);
 
-// 動画のダウンロードと一時保存（MP4のみ）
+// プロキシ設定
+const proxyUrl = "http://195.162.19.75:80"; // 例: スペインのプロキシ
+const agent = new HttpsProxyAgent(proxyUrl);
+
+// 動画ダウンロード（MP4のみ、プロキシ経由）
 app.post("/download", async (req, res) => {
   const { url } = req.body;
-  if (!url) return res.status(400).json({ error: "url required" });
+  if (!url) return res.status(400).json({ error: "URL required" });
 
   try {
     const fileName = `video_${Date.now()}.mp4`;
@@ -22,6 +27,7 @@ app.post("/download", async (req, res) => {
     const videoStream = ytdl(url, {
       filter: (format) =>
         format.container === "mp4" && format.hasAudio && format.hasVideo,
+      requestOptions: { agent },
     });
 
     const writeStream = fs.createWriteStream(filePath);
