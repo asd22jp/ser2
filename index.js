@@ -2,7 +2,7 @@ import express from "express";
 import ytdl from "ytdl-core";
 import fs from "fs";
 import path from "path";
-import HttpsProxyAgent from "https-proxy-agent";
+import { HttpsProxyAgent } from "https-proxy-agent";
 
 const app = express();
 app.use(express.json());
