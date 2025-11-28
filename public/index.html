@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <title>YouTube Downloader & Viewer</title>
+    <style>
+      /* 基本のフォントと背景 */
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f5f5f7;
+        color: #333;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 40px 20px;
+        min-height: 100vh;
+      }
+
+      h1 {
+        color: #222;
+        margin-bottom: 30px;
+      }
+
+      /* 入力欄とボタン */
+      .input-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 20px;
+      }
+
+      input[type="text"] {
+        width: 350px;
+        padding: 10px 15px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        font-size: 16px;
+        transition: border-color 0.2s;
+      }
+
+      input[type="text"]:focus {
+        border-color: #007bff;
+        outline: none;
+      }
+
+      button {
+        padding: 10px 20px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        cursor: pointer;
+        transition: background-color 0.2s;
+      }
+
+      button:hover {
+        background-color: #0056b3;
+      }
+
+      /* 動画プレイヤー */
+      #player {
+        width: 100%;
+        max-width: 720px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        margin-top: 20px;
+      }
+
+      video {
+        width: 100%;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      }
+
+      a {
+        text-decoration: none;
+        color: #007bff;
+        font-weight: bold;
+        transition: color 0.2s;
+      }
+
+      a:hover {
+        color: #0056b3;
+      }
+
+      /* レスポンシブ対応 */
+      @media (max-width: 480px) {
+        input[type="text"] {
+          width: 100%;
+        }
+
+        button {
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <h1>YouTube Downloader & Viewer</h1>
+    <div class="input-group">
+      <input type="text" id="url" placeholder="動画URLを入力" />
+      <button onclick="downloadVideo()">ダウンロード & 視聴</button>
+    </div>
+
+    <div id="player"></div>
+
+    <script>
+      async function downloadVideo() {
+        const url = document.getElementById("url").value;
+        if (!url) return alert("URLを入力してください");
+
+        try {
+          const res = await fetch("/download", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ url }),
+          });
+
+          const data = await res.json();
+          if (data.error) return alert(data.error);
+
+          const playerDiv = document.getElementById("player");
+          playerDiv.innerHTML = `
+          <video controls>
+            <source src="/video/${data.fileName}" type="video/mp4">
+          </video>
+          <a href="/download/${data.fileName}" download>ダウンロードする</a>
+        `;
+        } catch (err) {
+          alert("エラー: " + err.message);
+        }
+      }
+    </script>
+  </body>
+</html>
